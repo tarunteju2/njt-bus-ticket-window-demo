@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Educational NJ Bus Ticket Window</title>
+  <style>
+    :root {
+      --blue: #2d86d6;
+      --card: #efefef;
+      --text: #0f1722;
+      --muted: #3f4f63;
+      --qr-border: #aa4bb2;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #dbe9f7;
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 14px;
+    }
+
+    .ticket-wrap {
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: 0 20px 55px rgba(0, 0, 0, 0.16);
+      width: min(460px, 100%);
+    }
+
+    .ticket-top {
+      background: var(--blue);
+      padding: 22px 16px 78px;
+      color: #fff;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .ticket-card {
+      margin: -56px 16px 16px;
+      background: var(--card);
+      border-radius: 22px;
+      padding: 18px 16px 12px;
+      min-height: 630px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .qr-shell {
+      background: var(--qr-border);
+      padding: 14px;
+      border-radius: 12px;
+      width: 250px;
+      height: 250px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    #qrCanvas {
+      width: 222px;
+      height: 222px;
+      background: #fff;
+      display: block;
+      image-rendering: pixelated;
+      border: 1px solid #00000018;
+    }
+
+    .tap {
+      margin: 10px 0 12px;
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .dash {
+      width: 88%;
+      border-bottom: 4px dashed #c0c4ca;
+      margin-bottom: 18px;
+    }
+
+    .ticket-type {
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: 1.2px;
+      font-weight: 900;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .ticket-type.interstate {
+      color: #ea1242;
+    }
+
+    .zone {
+      margin: 2px 0 0;
+      font-size: 4rem;
+      line-height: 1;
+      font-weight: 900;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .zone-ride {
+      margin: 6px 0 0;
+      font-size: 1.05rem;
+      font-weight: 900;
+    }
+
+    .riders {
+      margin: 2px 0 150px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .stripe {
+      width: 92%;
+      height: 12px;
+      background: linear-gradient(90deg, #b7f7dc 0 33%, #7f0045 33% 67%, #f5f819 67% 100%);
+      margin-bottom: 14px;
+    }
+
+    .progress {
+      width: 80%;
+      height: 8px;
+      background: #dedede;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .progress > div {
+      width: 100%;
+      height: 100%;
+      background: #2190ff;
+      transform-origin: left center;
+    }
+
+    .timer {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    .timer strong {
+      font-size: 2.1rem;
+      letter-spacing: 0.6px;
+    }
+
+    .hint {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-decoration: underline;
+    }
+
+  </style>
+</head>
+<body>
+  <section class="ticket-wrap" aria-label="Bus Ticket Window">
+    <div class="ticket-top">One Way Ticket</div>
+    <div class="ticket-card">
+      <div class="qr-shell" id="qrShell">
+        <canvas id="qrCanvas" width="222" height="222" aria-label="QR style code"></canvas>
+      </div>
+      <p class="tap">Tap QR or numbers to refresh ticket</p>
+      <div class="dash"></div>
+
+      <h3 id="ticketTypeText" class="ticket-type">INTRASTATE</h3>
+      <p id="zoneText" class="zone">6</p>
+      <p class="zone-ride">ZONE RIDE</p>
+      <p id="ridersText" class="riders">1 Adult</p>
+
+      <div class="stripe"></div>
+      <div class="progress"><div id="progressBar"></div></div>
+      <p class="timer">Expires in <strong id="timerText">60:00</strong></p>
+      <p class="hint">View Onboard Validator Instructions</p>
+    </div>
+  </section>
+
+  <script>
+    const qrCanvas = document.getElementById("qrCanvas");
+    const qrShell = document.getElementById("qrShell");
+    const ctx = qrCanvas.getContext("2d");
+    const ticketTypeText = document.getElementById("ticketTypeText");
+    const zoneText = document.getElementById("zoneText");
+    const ridersText = document.getElementById("ridersText");
+    const timerText = document.getElementById("timerText");
+    const progressBar = document.getElementById("progressBar");
+
+    const borderColors = ["#aa4bb2", "#2d86d6"];
+    let borderIndex = 0;
+    let tripType = "intrastate";
+    let zone = 6;
+    let adults = 1;
+    let totalSeconds = 60 * 60;
+    let remainingSeconds = totalSeconds;
+    let timerId = null;
+    let qrIssueCounter = 0;
+
+    function randomUint32() {
+      if (window.crypto && window.crypto.getRandomValues) {
+        const arr = new Uint32Array(1);
+        window.crypto.getRandomValues(arr);
+        return arr[0];
+      }
+      return Math.floor(Math.random() * 4294967295);
+    }
+
+    function seedForQr() {
+      qrIssueCounter += 1;
+      return (Date.now() ^ randomUint32() ^ qrIssueCounter) >>> 0;
+    }
+
+    function rand(seedState) {
+      const next = (seedState * 1664525 + 1013904223) >>> 0;
+      return [next, next / 4294967296];
+    }
+
+    function drawFinder(x, y, m, unit, offset) {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(offset + x * unit, offset + y * unit, 7 * unit, 7 * unit);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(offset + (x + 1) * unit, offset + (y + 1) * unit, 5 * unit, 5 * unit);
+      ctx.fillStyle = "#000";
+      ctx.fillRect(offset + (x + 2) * unit, offset + (y + 2) * unit, 3 * unit, 3 * unit);
+      for (let r = 0; r < 7; r += 1) {
+        for (let c = 0; c < 7; c += 1) {
+          m[y + r][x + c] = 2;
+        }
+      }
+    }
+
+    function drawQrLike(seed) {
+      const size = 37;
+      const unit = Math.floor(qrCanvas.width / size);
+      const offset = Math.floor((qrCanvas.width - size * unit) / 2);
+      const m = Array.from({ length: size }, () => Array(size).fill(0));
+
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
+
+      drawFinder(2, 2, m, unit, offset);
+      drawFinder(size - 9, 2, m, unit, offset);
+      drawFinder(2, size - 9, m, unit, offset);
+
+      let s = seed;
+      for (let r = 0; r < size; r += 1) {
+        for (let c = 0; c < size; c += 1) {
+          if (m[r][c] === 2) {
+            continue;
+          }
+          const out = rand(s);
+          s = out[0];
+          if (out[1] > 0.53) {
+            ctx.fillStyle = "#000";
+            ctx.fillRect(offset + c * unit, offset + r * unit, unit, unit);
+          }
+        }
+      }
+    }
+
+    function formatTimer(sec) {
+      const min = Math.floor(sec / 60).toString();
+      const secs = Math.floor(sec % 60).toString().padStart(2, "0");
+      return `${min}:${secs}`;
+    }
+
+    function renderTicketText() {
+      ticketTypeText.textContent = tripType.toUpperCase();
+      ticketTypeText.classList.toggle("interstate", tripType === "interstate");
+      zoneText.textContent = zone.toString();
+      ridersText.textContent = `${adults} ${adults === 1 ? "Adult" : "Adults"}`;
+    }
+
+    function tick() {
+      if (remainingSeconds <= 0) {
+        clearInterval(timerId);
+        timerId = null;
+        timerText.textContent = "0:00";
+        progressBar.style.transform = "scaleX(0)";
+        return;
+      }
+
+      remainingSeconds -= 1;
+      timerText.textContent = formatTimer(remainingSeconds);
+      progressBar.style.transform = `scaleX(${remainingSeconds / totalSeconds})`;
+    }
+
+    function issueTicket() {
+      borderIndex = (borderIndex + 1) % borderColors.length;
+      qrShell.style.backgroundColor = borderColors[borderIndex];
+      drawQrLike(seedForQr());
+      renderTicketText();
+
+      totalSeconds = tripType === "interstate" ? 60 * 60 : 30 * 60;
+      remainingSeconds = totalSeconds;
+      timerText.textContent = formatTimer(remainingSeconds);
+      progressBar.style.transform = "scaleX(1)";
+
+      if (timerId) {
+        clearInterval(timerId);
+      }
+      timerId = setInterval(tick, 1000);
+    }
+
+    zoneText.addEventListener("click", () => {
+      zone = zone === 20 ? 1 : zone + 1;
+      issueTicket();
+    });
+
+    ridersText.addEventListener("click", () => {
+      adults = adults === 10 ? 1 : adults + 1;
+      issueTicket();
+    });
+
+    ticketTypeText.addEventListener("click", () => {
+      tripType = tripType === "intrastate" ? "interstate" : "intrastate";
+      issueTicket();
+    });
+
+    qrShell.addEventListener("click", issueTicket);
+    issueTicket();
+  </script>
+</body>
+</html>
