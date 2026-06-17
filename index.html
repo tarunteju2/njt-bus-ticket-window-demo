@@ -7,8 +7,7 @@
   <style>
     :root {
       --blue: #2f8ad6;
-      --screen-gray: #d0d2da;
-      --card-gray: #e9e9eb;
+      --bezel: #e6ebf1;
       --ink: #000;
       --qr-purple: #b06ab4;
       --qr-blue: #2f8ad6;
@@ -22,7 +21,7 @@
     body {
       margin: 0;
       min-height: 100dvh;
-      background: linear-gradient(to bottom, var(--blue) 0 41%, var(--screen-gray) 41% 100%);
+      background: var(--bezel);
       color: var(--ink);
       overflow: hidden;
     }
@@ -31,42 +30,40 @@
       width: min(768px, 100vw);
       height: 100dvh;
       margin: 0 auto;
-      padding: max(10px, env(safe-area-inset-top)) 0 0;
+      padding: 0;
       display: flex;
       flex-direction: column;
     }
 
-    /* Safety guard: hide any previously used fake status-bar elements. */
-    .status,
-    .dynamic-island,
-    .status-right,
-    .signal,
-    .wifi,
-    .battery,
-    .nav-arrow {
-      display: none !important;
+    .header {
+      background: var(--blue);
+      border-radius: 0 0 16px 16px;
+      padding: max(12px, env(safe-area-inset-top)) 0 clamp(58px, 10vh, 96px);
+      flex: 0 0 auto;
     }
 
     .title {
       text-align: center;
       color: #fff;
-      margin: clamp(18px, 3.2vh, 34px) 0 clamp(26px, 4.2vh, 52px);
+      margin: clamp(12px, 2.4vh, 24px) 0 0;
       font-weight: 600;
-      font-size: clamp(28px, 5.2vw, 50px);
+      font-size: clamp(26px, 5vw, 48px);
     }
 
     .ticket-card {
-      width: min(92vw, 680px);
-      margin: 0 auto;
-      border-radius: 40px;
-      background: var(--card-gray);
-      padding: clamp(22px, 3.8vh, 44px) clamp(18px, 4vw, 32px) clamp(20px, 3.4vh, 28px);
-      height: calc(100dvh - clamp(110px, 18vh, 165px));
-      min-height: 560px;
+      width: min(94vw, 700px);
+      margin: clamp(-50px, -8vh, -80px) auto 0;
+      border-radius: 28px;
+      background: #fff;
+      padding: clamp(20px, 3.2vh, 38px) clamp(18px, 4vw, 32px) clamp(16px, 2.6vh, 24px);
+      flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
+      position: relative;
+      z-index: 1;
     }
 
     .qr-shell {
@@ -97,11 +94,11 @@
     .dash {
       width: 84%;
       border-bottom: 5px dashed #bbbfc7;
-      margin-bottom: 48px;
+      margin-bottom: 0;
     }
 
     .type {
-      margin: 0;
+      margin: clamp(28px, 6vh, 70px) 0 0;
       font-size: clamp(46px, 8vw, 80px);
       font-weight: 900;
       letter-spacing: 1.2px;
@@ -185,7 +182,9 @@
 </head>
 <body>
   <main class="phone">
-    <h1 class="title">One Way Ticket</h1>
+    <header class="header">
+      <h1 class="title">One Way Ticket</h1>
+    </header>
 
     <section class="ticket-card" aria-label="Ticket">
       <div class="qr-shell" id="qrShell">
@@ -308,12 +307,12 @@
         clearInterval(timerId);
         timerId = null;
         timerText.textContent = "0:00";
-        progressBar.style.transform = "scaleX(0)";
+        progressBar.style.transform = "scaleX(1)";
         return;
       }
       remainingSeconds -= 1;
       timerText.textContent = formatTimer(remainingSeconds);
-      progressBar.style.transform = `scaleX(${remainingSeconds / totalSeconds})`;
+      progressBar.style.transform = `scaleX(${(totalSeconds - remainingSeconds) / totalSeconds})`;
     }
 
     function issueTicket() {
@@ -325,7 +324,7 @@
       totalSeconds = tripType === "interstate" ? 60 * 60 : 30 * 60;
       remainingSeconds = totalSeconds;
       timerText.textContent = formatTimer(remainingSeconds);
-      progressBar.style.transform = "scaleX(1)";
+      progressBar.style.transform = "scaleX(0)";
 
       if (timerId) {
         clearInterval(timerId);
