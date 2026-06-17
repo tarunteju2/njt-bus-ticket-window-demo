@@ -33,6 +33,17 @@
       padding: 0;
     }
 
+    /* Safety guard: hide any previously used fake status-bar elements. */
+    .status,
+    .dynamic-island,
+    .status-right,
+    .signal,
+    .wifi,
+    .battery,
+    .nav-arrow {
+      display: none !important;
+    }
+
     .title {
       text-align: center;
       color: #fff;
