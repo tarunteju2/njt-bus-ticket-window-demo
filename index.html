@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Educational NJ Bus Ticket Window</title>
+  <title>One Way Ticket</title>
   <style>
     :root {
-      --blue: #2d86d6;
-      --card: #efefef;
-      --text: #0f1722;
-      --muted: #3f4f63;
-      --qr-border: #aa4bb2;
+      --blue: #2f8ad6;
+      --screen-gray: #d0d2da;
+      --card-gray: #e9e9eb;
+      --ink: #000;
+      --qr-purple: #b06ab4;
+      --qr-blue: #2f8ad6;
     }
 
     * {
@@ -21,35 +22,120 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: #dbe9f7;
-      color: var(--text);
+      background: linear-gradient(to bottom, var(--blue) 0 41%, var(--screen-gray) 41% 100%);
+      color: var(--ink);
+    }
+
+    .phone {
+      width: min(768px, 100vw);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 16px 0 0;
+    }
+
+    .status {
+      width: min(620px, 92vw);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+      font-weight: 600;
+      font-size: 46px;
+      line-height: 1;
+    }
+
+    .dynamic-island {
+      width: 380px;
+      max-width: 50vw;
+      height: 70px;
+      border-radius: 999px;
+      background: #000;
       display: grid;
       place-items: center;
-      padding: 14px;
+      flex: 0 0 auto;
+      margin: 0 16px;
     }
 
-    .ticket-wrap {
-      border-radius: 26px;
-      overflow: hidden;
-      box-shadow: 0 20px 55px rgba(0, 0, 0, 0.16);
-      width: min(460px, 100%);
+    .nav-arrow {
+      width: 22px;
+      height: 22px;
+      border-top: 8px solid #0a84ff;
+      border-left: 8px solid #0a84ff;
+      transform: rotate(45deg);
+      margin-top: 6px;
     }
 
-    .ticket-top {
-      background: var(--blue);
-      padding: 22px 16px 78px;
-      color: #fff;
+    .status-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 40px;
+    }
+
+    .signal {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 26px;
+    }
+
+    .signal span {
+      width: 7px;
+      background: #fff;
+      border-radius: 2px;
+      opacity: 0.35;
+    }
+
+    .signal span:nth-child(1) { height: 10px; opacity: 1; }
+    .signal span:nth-child(2) { height: 16px; opacity: 0.9; }
+    .signal span:nth-child(3) { height: 22px; opacity: 0.75; }
+    .signal span:nth-child(4) { height: 26px; opacity: 0.45; }
+
+    .wifi {
+      width: 34px;
+      height: 26px;
+      border: 6px solid transparent;
+      border-top-color: #fff;
+      border-radius: 50%;
+      position: relative;
+      transform: rotate(180deg) translateY(-2px);
+    }
+
+    .wifi::before {
+      content: "";
+      position: absolute;
+      inset: -2px 3px 6px;
+      border: 5px solid transparent;
+      border-top-color: #fff;
+      border-radius: 50%;
+    }
+
+    .battery {
+      background: #f4d511;
+      color: #000;
+      border-radius: 11px;
+      padding: 3px 8px;
+      font-size: 38px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .title {
       text-align: center;
+      color: #fff;
+      margin: 58px 0 70px;
       font-weight: 600;
-      font-size: 1.1rem;
+      font-size: clamp(34px, 5.2vw, 58px);
     }
 
     .ticket-card {
-      margin: -56px 16px 16px;
-      background: var(--card);
-      border-radius: 22px;
-      padding: 18px 16px 12px;
-      min-height: 630px;
+      width: min(92vw, 680px);
+      margin: 0 auto;
+      border-radius: 40px;
+      background: var(--card-gray);
+      padding: 46px 32px 28px;
+      min-height: calc(100vh - 290px);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -57,153 +143,164 @@
     }
 
     .qr-shell {
-      background: var(--qr-border);
-      padding: 14px;
-      border-radius: 12px;
-      width: 250px;
-      height: 250px;
+      width: min(430px, 74vw);
+      aspect-ratio: 1 / 1;
+      background: var(--qr-purple);
+      border-radius: 18px;
       display: grid;
       place-items: center;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
+      transition: background-color 0.18s linear;
     }
 
     #qrCanvas {
-      width: 222px;
-      height: 222px;
-      background: #fff;
+      width: 88%;
+      height: 88%;
       display: block;
       image-rendering: pixelated;
-      border: 1px solid #00000018;
+      background: #fff;
+      border: 1px solid #00000020;
     }
 
     .tap {
-      margin: 10px 0 12px;
-      font-size: 0.84rem;
+      margin: 14px 0 18px;
+      font-size: clamp(18px, 3.7vw, 42px);
       font-weight: 600;
     }
 
     .dash {
-      width: 88%;
-      border-bottom: 4px dashed #c0c4ca;
-      margin-bottom: 18px;
+      width: 84%;
+      border-bottom: 5px dashed #bbbfc7;
+      margin-bottom: 48px;
     }
 
-    .ticket-type {
+    .type {
       margin: 0;
-      font-size: 1.05rem;
-      letter-spacing: 1.2px;
+      font-size: clamp(46px, 8vw, 80px);
       font-weight: 900;
-      cursor: pointer;
-      user-select: none;
+      letter-spacing: 1.2px;
+      line-height: 1.03;
     }
 
-    .ticket-type.interstate {
-      color: #ea1242;
+    .type.interstate {
+      color: #e2184a;
     }
 
     .zone {
-      margin: 2px 0 0;
-      font-size: 4rem;
-      line-height: 1;
+      margin: 8px 0 0;
+      font-size: clamp(84px, 13vw, 130px);
+      line-height: 0.95;
       font-weight: 900;
-      cursor: pointer;
-      user-select: none;
     }
 
     .zone-ride {
-      margin: 6px 0 0;
-      font-size: 1.05rem;
+      margin: 16px 0 0;
+      font-size: clamp(36px, 5.6vw, 58px);
       font-weight: 900;
+      line-height: 1;
     }
 
     .riders {
-      margin: 2px 0 150px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      user-select: none;
+      margin: 8px 0 240px;
+      font-size: clamp(28px, 4.6vw, 48px);
+      line-height: 1.05;
     }
 
     .stripe {
-      width: 92%;
-      height: 12px;
-      background: linear-gradient(90deg, #b7f7dc 0 33%, #7f0045 33% 67%, #f5f819 67% 100%);
-      margin-bottom: 14px;
+      width: 90%;
+      height: 20px;
+      background: linear-gradient(90deg, #c5ebe0 0 33.333%, #a36e83 33.333% 66.666%, #e6e462 66.666% 100%);
+      margin-bottom: 48px;
     }
 
     .progress {
-      width: 80%;
-      height: 8px;
-      background: #dedede;
+      width: 84%;
+      height: 14px;
+      background: #dddde0;
       border-radius: 999px;
       overflow: hidden;
-      margin-bottom: 16px;
+      margin-bottom: 36px;
     }
 
     .progress > div {
       width: 100%;
       height: 100%;
-      background: #2190ff;
+      background: #1e81ec;
+      border-radius: inherit;
       transform-origin: left center;
     }
 
     .timer {
       margin: 0;
-      font-size: 0.9rem;
+      font-size: clamp(28px, 5.4vw, 52px);
+      line-height: 1;
     }
 
     .timer strong {
-      font-size: 2.1rem;
-      letter-spacing: 0.6px;
+      font-size: clamp(62px, 9.6vw, 96px);
+      font-weight: 900;
+      letter-spacing: 0.5px;
     }
 
     .hint {
-      margin-top: 6px;
-      font-size: 0.78rem;
-      color: var(--muted);
+      margin: 16px 0 0;
+      font-size: clamp(20px, 4.1vw, 40px);
       text-decoration: underline;
+      text-underline-offset: 3px;
+      color: #1a1a1a;
+      line-height: 1.08;
     }
-
   </style>
 </head>
 <body>
-  <section class="ticket-wrap" aria-label="Bus Ticket Window">
-    <div class="ticket-top">One Way Ticket</div>
-    <div class="ticket-card">
-      <div class="qr-shell" id="qrShell">
-        <canvas id="qrCanvas" width="222" height="222" aria-label="QR style code"></canvas>
+  <main class="phone">
+    <header class="status" aria-hidden="true">
+      <div>5:51</div>
+      <div class="dynamic-island"><div class="nav-arrow"></div></div>
+      <div class="status-right">
+        <div class="signal"><span></span><span></span><span></span><span></span></div>
+        <div class="wifi"></div>
+        <div class="battery">58</div>
       </div>
-      <p class="tap">Tap QR or numbers to refresh ticket</p>
+    </header>
+
+    <h1 class="title">One Way Ticket</h1>
+
+    <section class="ticket-card" aria-label="Ticket">
+      <div class="qr-shell" id="qrShell">
+        <canvas id="qrCanvas" width="380" height="380" aria-label="QR code"></canvas>
+      </div>
+
+      <p class="tap">Tap to enlarge</p>
       <div class="dash"></div>
 
-      <h3 id="ticketTypeText" class="ticket-type">INTRASTATE</h3>
-      <p id="zoneText" class="zone">6</p>
+      <h2 id="typeText" class="type">INTRASTATE</h2>
+      <p id="zoneText" class="zone">2</p>
       <p class="zone-ride">ZONE RIDE</p>
-      <p id="ridersText" class="riders">1 Adult</p>
+      <p id="ridersText" class="riders">2 Adults</p>
 
       <div class="stripe"></div>
       <div class="progress"><div id="progressBar"></div></div>
-      <p class="timer">Expires in <strong id="timerText">60:00</strong></p>
+      <p class="timer">Expires in <strong id="timerText">30:00</strong></p>
       <p class="hint">View Onboard Validator Instructions</p>
-    </div>
-  </section>
+    </section>
+  </main>
 
   <script>
     const qrCanvas = document.getElementById("qrCanvas");
     const qrShell = document.getElementById("qrShell");
     const ctx = qrCanvas.getContext("2d");
-    const ticketTypeText = document.getElementById("ticketTypeText");
+    const typeText = document.getElementById("typeText");
     const zoneText = document.getElementById("zoneText");
     const ridersText = document.getElementById("ridersText");
     const timerText = document.getElementById("timerText");
     const progressBar = document.getElementById("progressBar");
 
-    const borderColors = ["#aa4bb2", "#2d86d6"];
-    let borderIndex = 0;
+    const borderColors = ["var(--qr-purple)", "var(--qr-blue)"];
+    let borderIndex = -1;
     let tripType = "intrastate";
-    let zone = 6;
-    let adults = 1;
-    let totalSeconds = 60 * 60;
+    let zone = 2;
+    let adults = 2;
+    let totalSeconds = 30 * 60;
     let remainingSeconds = totalSeconds;
     let timerId = null;
     let qrIssueCounter = 0;
@@ -217,17 +314,17 @@
       return Math.floor(Math.random() * 4294967295);
     }
 
-    function seedForQr() {
+    function nextSeed() {
       qrIssueCounter += 1;
       return (Date.now() ^ randomUint32() ^ qrIssueCounter) >>> 0;
     }
 
-    function rand(seedState) {
-      const next = (seedState * 1664525 + 1013904223) >>> 0;
+    function rand(state) {
+      const next = (state * 1664525 + 1013904223) >>> 0;
       return [next, next / 4294967296];
     }
 
-    function drawFinder(x, y, m, unit, offset) {
+    function drawFinder(x, y, matrix, unit, offset) {
       ctx.fillStyle = "#000";
       ctx.fillRect(offset + x * unit, offset + y * unit, 7 * unit, 7 * unit);
       ctx.fillStyle = "#fff";
@@ -236,33 +333,33 @@
       ctx.fillRect(offset + (x + 2) * unit, offset + (y + 2) * unit, 3 * unit, 3 * unit);
       for (let r = 0; r < 7; r += 1) {
         for (let c = 0; c < 7; c += 1) {
-          m[y + r][x + c] = 2;
+          matrix[y + r][x + c] = 2;
         }
       }
     }
 
-    function drawQrLike(seed) {
-      const size = 37;
+    function drawQr(seed) {
+      const size = 57;
       const unit = Math.floor(qrCanvas.width / size);
       const offset = Math.floor((qrCanvas.width - size * unit) / 2);
-      const m = Array.from({ length: size }, () => Array(size).fill(0));
+      const matrix = Array.from({ length: size }, () => Array(size).fill(0));
 
       ctx.fillStyle = "#fff";
       ctx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
 
-      drawFinder(2, 2, m, unit, offset);
-      drawFinder(size - 9, 2, m, unit, offset);
-      drawFinder(2, size - 9, m, unit, offset);
+      drawFinder(2, 2, matrix, unit, offset);
+      drawFinder(size - 9, 2, matrix, unit, offset);
+      drawFinder(2, size - 9, matrix, unit, offset);
 
-      let s = seed;
+      let state = seed;
       for (let r = 0; r < size; r += 1) {
         for (let c = 0; c < size; c += 1) {
-          if (m[r][c] === 2) {
+          if (matrix[r][c] === 2) {
             continue;
           }
-          const out = rand(s);
-          s = out[0];
-          if (out[1] > 0.53) {
+          const output = rand(state);
+          state = output[0];
+          if (output[1] > 0.5) {
             ctx.fillStyle = "#000";
             ctx.fillRect(offset + c * unit, offset + r * unit, unit, unit);
           }
@@ -270,15 +367,15 @@
       }
     }
 
-    function formatTimer(sec) {
-      const min = Math.floor(sec / 60).toString();
-      const secs = Math.floor(sec % 60).toString().padStart(2, "0");
-      return `${min}:${secs}`;
+    function formatTimer(seconds) {
+      const mins = Math.floor(seconds / 60).toString();
+      const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
+      return `${mins}:${secs}`;
     }
 
-    function renderTicketText() {
-      ticketTypeText.textContent = tripType.toUpperCase();
-      ticketTypeText.classList.toggle("interstate", tripType === "interstate");
+    function renderText() {
+      typeText.textContent = tripType.toUpperCase();
+      typeText.classList.toggle("interstate", tripType === "interstate");
       zoneText.textContent = zone.toString();
       ridersText.textContent = `${adults} ${adults === 1 ? "Adult" : "Adults"}`;
     }
@@ -291,7 +388,6 @@
         progressBar.style.transform = "scaleX(0)";
         return;
       }
-
       remainingSeconds -= 1;
       timerText.textContent = formatTimer(remainingSeconds);
       progressBar.style.transform = `scaleX(${remainingSeconds / totalSeconds})`;
@@ -299,9 +395,9 @@
 
     function issueTicket() {
       borderIndex = (borderIndex + 1) % borderColors.length;
-      qrShell.style.backgroundColor = borderColors[borderIndex];
-      drawQrLike(seedForQr());
-      renderTicketText();
+      qrShell.style.background = borderColors[borderIndex];
+      drawQr(nextSeed());
+      renderText();
 
       totalSeconds = tripType === "interstate" ? 60 * 60 : 30 * 60;
       remainingSeconds = totalSeconds;
@@ -314,6 +410,7 @@
       timerId = setInterval(tick, 1000);
     }
 
+    // Hidden interactions retained for demo controls while keeping screenshot-identical UI.
     zoneText.addEventListener("click", () => {
       zone = zone === 20 ? 1 : zone + 1;
       issueTicket();
@@ -324,7 +421,7 @@
       issueTicket();
     });
 
-    ticketTypeText.addEventListener("click", () => {
+    typeText.addEventListener("click", () => {
       tripType = tripType === "intrastate" ? "interstate" : "intrastate";
       issueTicket();
     });
