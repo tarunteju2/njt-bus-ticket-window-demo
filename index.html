@@ -7,7 +7,8 @@
   <style>
     :root {
       --blue: #2f88d5;
-      --bezel: #cfd2db;
+      --bezel: #cfd1d9;
+      --card: #ececef;
       --ink: #000;
       --qr-purple: #b06ab4;
       --qr-blue: #2f8ad6;
@@ -30,45 +31,127 @@
 
     .phone {
       position: relative;
-      width: 100%;
+      width: min(768px, 100vw);
       height: 100dvh;
-      max-width: 100vw;
       margin: 0 auto;
       overflow: hidden;
+      background: var(--bezel);
     }
 
     .header {
       position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      height: clamp(230px, 34dvh, 350px);
+      inset: 0 0 auto 0;
+      height: clamp(320px, 40dvh, 420px);
       background: var(--blue);
-      border-bottom-left-radius: 44px;
-      border-bottom-right-radius: 44px;
+      border-bottom-left-radius: 40px;
+      border-bottom-right-radius: 40px;
       z-index: 0;
     }
 
-    .title {
-      margin: calc(env(safe-area-inset-top) + clamp(24px, 5dvh, 50px)) 0 0;
-      text-align: center;
+    .status {
+      width: min(650px, 90vw);
+      margin: calc(env(safe-area-inset-top) + 18px) auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       color: #fff;
       font-weight: 600;
-      font-size: clamp(28px, 6.3vw, 56px);
-      letter-spacing: 0;
+      font-size: clamp(28px, 4.7vw, 44px);
+      line-height: 1;
+    }
+
+    .island {
+      width: min(350px, 46vw);
+      height: clamp(56px, 7.2vh, 72px);
+      border-radius: 999px;
+      background: #000;
+      display: grid;
+      place-items: center;
+      margin: 0 14px;
+      flex: 0 0 auto;
+    }
+
+    .arrow {
+      width: 22px;
+      height: 22px;
+      border-top: 8px solid #0b84ff;
+      border-left: 8px solid #0b84ff;
+      transform: rotate(45deg);
+      margin-top: 4px;
+    }
+
+    .status-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .signal {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 24px;
+    }
+
+    .signal span {
+      width: 6px;
+      border-radius: 2px;
+      background: #fff;
+    }
+
+    .signal span:nth-child(1) { height: 10px; opacity: 1; }
+    .signal span:nth-child(2) { height: 14px; opacity: 0.9; }
+    .signal span:nth-child(3) { height: 18px; opacity: 0.75; }
+    .signal span:nth-child(4) { height: 22px; opacity: 0.5; }
+
+    .wifi {
+      width: 30px;
+      height: 20px;
+      border-top: 5px solid #fff;
+      border-radius: 999px 999px 0 0;
+      position: relative;
+      transform: rotate(180deg) translateY(-2px);
+    }
+
+    .wifi::before {
+      content: "";
+      position: absolute;
+      left: 4px;
+      right: 4px;
+      top: -7px;
+      border-top: 5px solid #fff;
+      border-radius: 999px 999px 0 0;
+      opacity: 0.85;
+    }
+
+    .battery {
+      background: #f4d511;
+      color: #000;
+      border-radius: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      line-height: 1;
+      font-size: clamp(24px, 4vw, 38px);
+    }
+
+    .title {
+      text-align: center;
+      color: #fff;
+      margin: clamp(22px, 3.8vh, 42px) 0 0;
+      font-weight: 600;
+      font-size: clamp(36px, 6.6vw, 62px);
       line-height: 1.05;
     }
 
     .ticket-card {
       position: absolute;
-      left: clamp(26px, 6.5vw, 52px);
-      right: clamp(26px, 6.5vw, 52px);
-      top: clamp(145px, 22dvh, 230px);
-      bottom: 0;
-      border-top-left-radius: 42px;
-      border-top-right-radius: 42px;
-      background: #fff;
-      padding: clamp(28px, 4.5dvh, 44px) clamp(18px, 4.5vw, 34px) clamp(18px, 3dvh, 28px);
+      left: clamp(24px, 6vw, 48px);
+      right: clamp(24px, 6vw, 48px);
+      top: clamp(210px, 29.5dvh, 300px);
+      bottom: clamp(20px, 2.8dvh, 28px);
+      border-radius: 42px;
+      background: var(--card);
+      padding: clamp(26px, 4.1dvh, 40px) clamp(18px, 4vw, 30px) clamp(18px, 2.8dvh, 24px);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -77,11 +160,11 @@
     }
 
     .qr-shell {
-      width: min(56vw, 420px);
+      width: min(56vw, 426px);
       max-width: 100%;
       aspect-ratio: 1 / 1;
-      background: var(--qr-purple);
       border-radius: 16px;
+      background: var(--qr-purple);
       display: grid;
       place-items: center;
       transition: background-color 0.18s linear;
@@ -97,76 +180,75 @@
     }
 
     .tap {
-      margin: clamp(10px, 1.8dvh, 18px) 0 clamp(10px, 1.8dvh, 16px);
-      font-size: clamp(24px, 4.6vw, 48px);
+      margin: clamp(10px, 1.6dvh, 16px) 0 clamp(10px, 1.6dvh, 14px);
+      font-size: clamp(22px, 4.5vw, 38px);
       font-weight: 600;
       line-height: 1.05;
     }
 
     .dash {
       width: 84%;
-      border-bottom: 5px dashed #b7bcc6;
-      margin-bottom: clamp(22px, 3.6dvh, 44px);
+      border-bottom: 5px dashed #b7bcc5;
+      margin-bottom: clamp(22px, 3.2dvh, 34px);
     }
 
     .type {
       margin: 0;
-      font-size: clamp(52px, 9.8vw, 88px);
+      font-size: clamp(58px, 9.5vw, 86px);
       font-weight: 900;
       letter-spacing: 1px;
       line-height: 1;
     }
 
     .type.interstate {
-      color: #ea2948;
+      color: #ff3347;
     }
 
     .zone {
-      margin: clamp(8px, 1.4dvh, 14px) 0 0;
-      font-size: clamp(98px, 17vw, 150px);
+      margin: clamp(8px, 1.2dvh, 12px) 0 0;
+      font-size: clamp(96px, 16.5vw, 146px);
       line-height: 0.92;
       font-weight: 900;
     }
 
     .zone-ride {
-      margin: clamp(10px, 1.8dvh, 20px) 0 0;
-      font-size: clamp(52px, 8.6vw, 84px);
+      margin: clamp(8px, 1.5dvh, 16px) 0 0;
+      font-size: clamp(56px, 8.8vw, 82px);
       font-weight: 900;
       line-height: 1;
     }
 
     .riders {
       margin: clamp(8px, 1.2dvh, 14px) 0 0;
-      font-size: clamp(22px, 4.8vw, 44px);
+      font-size: clamp(20px, 4.4vw, 40px);
       line-height: 1.05;
     }
 
     .stretch {
       flex: 1;
-      min-height: clamp(24px, 8dvh, 150px);
+      min-height: clamp(26px, 8.5dvh, 140px);
     }
 
     .stripe {
       width: 88%;
-      height: clamp(14px, 1.8dvh, 22px);
-      background: linear-gradient(90deg, #c5ebe0 0 33.333%, #7d0a45 33.333% 66.666%, #ece90d 66.666% 100%);
-      margin-bottom: clamp(24px, 3.8dvh, 44px);
+      height: clamp(14px, 1.8dvh, 20px);
+      background: linear-gradient(90deg, #c4eadf 0 33.333%, #7d0a45 33.333% 66.666%, #ece90d 66.666% 100%);
+      margin-bottom: clamp(20px, 3.2dvh, 34px);
       animation: stripeBlink 2.6s ease-in-out infinite;
     }
 
     @keyframes stripeBlink {
-      0%,
-      100% { opacity: 1; }
+      0%, 100% { opacity: 1; }
       50% { opacity: 0.28; }
     }
 
     .progress {
       width: 84%;
-      height: clamp(10px, 1.4dvh, 14px);
-      background: #e2e2e5;
+      height: clamp(10px, 1.2dvh, 14px);
+      background: #dddde0;
       border-radius: 999px;
       overflow: hidden;
-      margin-bottom: clamp(20px, 3.2dvh, 40px);
+      margin-bottom: clamp(18px, 2.8dvh, 28px);
     }
 
     .progress > div {
@@ -180,29 +262,51 @@
 
     .timer {
       margin: 0;
-      font-size: clamp(22px, 5vw, 46px);
-      line-height: 1.02;
+      font-size: clamp(22px, 4.9vw, 44px);
+      line-height: 1.04;
     }
 
     .timer strong {
-      font-size: clamp(72px, 11.2vw, 104px);
+      font-size: clamp(64px, 10.8vw, 98px);
       font-weight: 900;
       letter-spacing: 0.4px;
     }
 
     .hint {
-      margin: clamp(8px, 1.8dvh, 18px) 0 0;
-      font-size: clamp(20px, 4.6vw, 42px);
-      line-height: 1.08;
-      color: #1a1a1a;
+      margin: clamp(8px, 1.4dvh, 14px) 0 0;
+      font-size: clamp(20px, 4.4vw, 38px);
       text-decoration: underline;
       text-underline-offset: 3px;
+      color: #1a1a1a;
+      line-height: 1.08;
+    }
+
+    .home-indicator {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: calc(env(safe-area-inset-bottom) + 6px);
+      width: min(280px, 36vw);
+      height: 10px;
+      border-radius: 999px;
+      background: #bfc0c6;
+      opacity: 0.75;
+      z-index: 2;
     }
   </style>
 </head>
 <body>
   <main class="phone">
     <header class="header">
+      <div class="status" aria-hidden="true">
+        <div>6:19</div>
+        <div class="island"><div class="arrow"></div></div>
+        <div class="status-right">
+          <div class="signal"><span></span><span></span><span></span><span></span></div>
+          <div class="wifi"></div>
+          <div class="battery">48</div>
+        </div>
+      </div>
       <h1 class="title">One Way Ticket</h1>
     </header>
 
@@ -214,7 +318,7 @@
       <p class="tap">Tap to enlarge</p>
       <div class="dash"></div>
 
-      <h2 id="typeText" class="type">INTRASTATE</h2>
+      <h2 id="typeText" class="type interstate">INTERSTATE</h2>
       <p id="zoneText" class="zone">2</p>
       <p class="zone-ride">ZONE RIDE</p>
       <p id="ridersText" class="riders">1 Adult</p>
@@ -222,9 +326,11 @@
 
       <div class="stripe"></div>
       <div class="progress"><div id="progressBar"></div></div>
-      <p class="timer">Expires in <strong id="timerText">30:00</strong></p>
+      <p class="timer">Expires in <strong id="timerText">56:08</strong></p>
       <p class="hint">View Onboard Validator Instructions</p>
     </section>
+
+    <div class="home-indicator" aria-hidden="true"></div>
   </main>
 
   <script>
@@ -239,13 +345,14 @@
 
     const borderColors = ["var(--qr-purple)", "var(--qr-blue)"];
     let borderIndex = -1;
-    let tripType = "intrastate";
+    let tripType = "interstate";
     let zone = 2;
     let adults = 1;
-    let totalSeconds = 30 * 60;
-    let remainingSeconds = totalSeconds;
+    let totalSeconds = 60 * 60;
+    let remainingSeconds = 56 * 60 + 8;
     let timerId = null;
     let qrIssueCounter = 0;
+    let firstIssue = true;
 
     function randomUint32() {
       if (window.crypto && window.crypto.getRandomValues) {
@@ -343,8 +450,14 @@
 
       totalSeconds = tripType === "interstate" ? 60 * 60 : 30 * 60;
       remainingSeconds = totalSeconds;
+
+      if (firstIssue && tripType === "interstate") {
+        remainingSeconds = 56 * 60 + 8;
+        firstIssue = false;
+      }
+
       timerText.textContent = formatTimer(remainingSeconds);
-      progressBar.style.transform = "scaleX(0)";
+      progressBar.style.transform = `scaleX(${(totalSeconds - remainingSeconds) / totalSeconds})`;
 
       if (timerId) {
         clearInterval(timerId);
