@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>One Way Ticket</title>
   <style>
     :root {
-      --blue: #2f8ad6;
-      --bezel: #e6ebf1;
+      --blue: #2f88d5;
+      --bezel: #cfd2db;
       --ink: #000;
       --qr-purple: #b06ab4;
       --qr-blue: #2f8ad6;
@@ -18,59 +18,70 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     }
 
+    html,
     body {
       margin: 0;
-      min-height: 100dvh;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
       background: var(--bezel);
       color: var(--ink);
-      overflow: hidden;
     }
 
     .phone {
-      width: min(768px, 100vw);
+      position: relative;
+      width: 100%;
       height: 100dvh;
+      max-width: 100vw;
       margin: 0 auto;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
+      overflow: hidden;
     }
 
     .header {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: clamp(230px, 34dvh, 350px);
       background: var(--blue);
-      border-radius: 0 0 16px 16px;
-      padding: max(12px, env(safe-area-inset-top)) 0 clamp(58px, 10vh, 96px);
-      flex: 0 0 auto;
+      border-bottom-left-radius: 44px;
+      border-bottom-right-radius: 44px;
+      z-index: 0;
     }
 
     .title {
+      margin: calc(env(safe-area-inset-top) + clamp(24px, 5dvh, 50px)) 0 0;
       text-align: center;
       color: #fff;
-      margin: clamp(12px, 2.4vh, 24px) 0 0;
       font-weight: 600;
-      font-size: clamp(26px, 5vw, 48px);
+      font-size: clamp(28px, 6.3vw, 56px);
+      letter-spacing: 0;
+      line-height: 1.05;
     }
 
     .ticket-card {
-      width: min(94vw, 700px);
-      margin: clamp(-50px, -8vh, -80px) auto 0;
-      border-radius: 28px;
+      position: absolute;
+      left: clamp(26px, 6.5vw, 52px);
+      right: clamp(26px, 6.5vw, 52px);
+      top: clamp(145px, 22dvh, 230px);
+      bottom: 0;
+      border-top-left-radius: 42px;
+      border-top-right-radius: 42px;
       background: #fff;
-      padding: clamp(20px, 3.2vh, 38px) clamp(18px, 4vw, 32px) clamp(16px, 2.6vh, 24px);
-      flex: 1;
-      min-height: 0;
+      padding: clamp(28px, 4.5dvh, 44px) clamp(18px, 4.5vw, 34px) clamp(18px, 3dvh, 28px);
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      position: relative;
       z-index: 1;
     }
 
     .qr-shell {
-      width: min(430px, 74vw);
+      width: min(56vw, 420px);
+      max-width: 100%;
       aspect-ratio: 1 / 1;
       background: var(--qr-purple);
-      border-radius: 18px;
+      border-radius: 16px;
       display: grid;
       place-items: center;
       transition: background-color 0.18s linear;
@@ -80,109 +91,112 @@
       width: 88%;
       height: 88%;
       display: block;
-      image-rendering: pixelated;
       background: #fff;
+      image-rendering: pixelated;
       border: 1px solid #00000020;
     }
 
     .tap {
-      margin: 14px 0 18px;
-      font-size: clamp(18px, 3.7vw, 42px);
+      margin: clamp(10px, 1.8dvh, 18px) 0 clamp(10px, 1.8dvh, 16px);
+      font-size: clamp(24px, 4.6vw, 48px);
       font-weight: 600;
+      line-height: 1.05;
     }
 
     .dash {
       width: 84%;
-      border-bottom: 5px dashed #bbbfc7;
-      margin-bottom: 0;
+      border-bottom: 5px dashed #b7bcc6;
+      margin-bottom: clamp(22px, 3.6dvh, 44px);
     }
 
     .type {
-      margin: clamp(28px, 6vh, 70px) 0 0;
-      font-size: clamp(46px, 8vw, 80px);
+      margin: 0;
+      font-size: clamp(52px, 9.8vw, 88px);
       font-weight: 900;
-      letter-spacing: 1.2px;
-      line-height: 1.03;
+      letter-spacing: 1px;
+      line-height: 1;
     }
 
     .type.interstate {
-      color: #e2184a;
+      color: #ea2948;
     }
 
     .zone {
-      margin: 8px 0 0;
-      font-size: clamp(84px, 13vw, 130px);
-      line-height: 0.95;
+      margin: clamp(8px, 1.4dvh, 14px) 0 0;
+      font-size: clamp(98px, 17vw, 150px);
+      line-height: 0.92;
       font-weight: 900;
     }
 
     .zone-ride {
-      margin: 16px 0 0;
-      font-size: clamp(36px, 5.6vw, 58px);
+      margin: clamp(10px, 1.8dvh, 20px) 0 0;
+      font-size: clamp(52px, 8.6vw, 84px);
       font-weight: 900;
       line-height: 1;
     }
 
     .riders {
-      margin: 8px 0 0;
-      font-size: clamp(24px, 4.2vw, 42px);
+      margin: clamp(8px, 1.2dvh, 14px) 0 0;
+      font-size: clamp(22px, 4.8vw, 44px);
       line-height: 1.05;
     }
 
     .stretch {
       flex: 1;
-      min-height: 40px;
+      min-height: clamp(24px, 8dvh, 150px);
     }
 
     .stripe {
-      width: 90%;
-      height: 20px;
-      background: linear-gradient(90deg, #c5ebe0 0 33.333%, #a36e83 33.333% 66.666%, #e6e462 66.666% 100%);
-      margin-bottom: 48px;
-      animation: stripeBlink 2.4s ease-in-out infinite;
+      width: 88%;
+      height: clamp(14px, 1.8dvh, 22px);
+      background: linear-gradient(90deg, #c5ebe0 0 33.333%, #7d0a45 33.333% 66.666%, #ece90d 66.666% 100%);
+      margin-bottom: clamp(24px, 3.8dvh, 44px);
+      animation: stripeBlink 2.6s ease-in-out infinite;
     }
 
     @keyframes stripeBlink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.25; }
+      0%,
+      100% { opacity: 1; }
+      50% { opacity: 0.28; }
     }
 
     .progress {
       width: 84%;
-      height: 14px;
-      background: #dddde0;
+      height: clamp(10px, 1.4dvh, 14px);
+      background: #e2e2e5;
       border-radius: 999px;
       overflow: hidden;
-      margin-bottom: 36px;
+      margin-bottom: clamp(20px, 3.2dvh, 40px);
     }
 
     .progress > div {
       width: 100%;
       height: 100%;
-      background: #1e81ec;
+      background: #1e84eb;
       border-radius: inherit;
       transform-origin: left center;
+      transform: scaleX(0);
     }
 
     .timer {
       margin: 0;
-      font-size: clamp(28px, 5.4vw, 52px);
-      line-height: 1;
+      font-size: clamp(22px, 5vw, 46px);
+      line-height: 1.02;
     }
 
     .timer strong {
-      font-size: clamp(62px, 9.6vw, 96px);
+      font-size: clamp(72px, 11.2vw, 104px);
       font-weight: 900;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
     }
 
     .hint {
-      margin: 16px 0 0;
-      font-size: clamp(20px, 4.1vw, 40px);
+      margin: clamp(8px, 1.8dvh, 18px) 0 0;
+      font-size: clamp(20px, 4.6vw, 42px);
+      line-height: 1.08;
+      color: #1a1a1a;
       text-decoration: underline;
       text-underline-offset: 3px;
-      color: #1a1a1a;
-      line-height: 1.08;
     }
   </style>
 </head>
@@ -194,7 +208,7 @@
 
     <section class="ticket-card" aria-label="Ticket">
       <div class="qr-shell" id="qrShell">
-        <canvas id="qrCanvas" width="380" height="380" aria-label="QR code"></canvas>
+        <canvas id="qrCanvas" width="420" height="420" aria-label="QR code"></canvas>
       </div>
 
       <p class="tap">Tap to enlarge</p>
@@ -203,7 +217,7 @@
       <h2 id="typeText" class="type">INTRASTATE</h2>
       <p id="zoneText" class="zone">2</p>
       <p class="zone-ride">ZONE RIDE</p>
-      <p id="ridersText" class="riders">2 Adults</p>
+      <p id="ridersText" class="riders">1 Adult</p>
       <div class="stretch"></div>
 
       <div class="stripe"></div>
@@ -227,7 +241,7 @@
     let borderIndex = -1;
     let tripType = "intrastate";
     let zone = 2;
-    let adults = 2;
+    let adults = 1;
     let totalSeconds = 30 * 60;
     let remainingSeconds = totalSeconds;
     let timerId = null;
@@ -338,7 +352,6 @@
       timerId = setInterval(tick, 1000);
     }
 
-    // Hidden interactions retained for demo controls while keeping screenshot-identical UI.
     zoneText.addEventListener("click", () => {
       zone = zone === 20 ? 1 : zone + 1;
       issueTicket();
