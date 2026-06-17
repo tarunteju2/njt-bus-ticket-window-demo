@@ -139,6 +139,12 @@
       height: 20px;
       background: linear-gradient(90deg, #c5ebe0 0 33.333%, #a36e83 33.333% 66.666%, #e6e462 66.666% 100%);
       margin-bottom: 48px;
+      animation: stripeBlink 2.4s ease-in-out infinite;
+    }
+
+    @keyframes stripeBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.25; }
     }
 
     .progress {
